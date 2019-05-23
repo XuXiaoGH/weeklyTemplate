@@ -9,11 +9,29 @@ import template from '../../source/template';
 import statusList from '../../source/statusList';
 import workerList from '../../source/workerList';
 import weekList from '../../source/weekList';
+import workType from "../../source/projectList";
 
+const ONE_DAY = 24 * 60 * 60 * 1000;
 const workerIdList = Object.keys(workerList);
+const dateList = [];
+const week = new Date().getDay();
+for (let i = 1; i <= week; i++) {
+  dateList.push({
+    label: weekList[i].label,
+    value: UTIL.formatTimestamp(new Date().getTime() - ONE_DAY * (week - i), 'MM-dd')
+  })
+}
+for (let i = week + 1; i <= 6; i++) {
+  dateList.push({
+    label: weekList[i].label,
+    value: UTIL.formatTimestamp(new Date().getTime() + ONE_DAY * (i - week), 'MM-dd')
+  })
+}
+console.log(dateList);
+console.log(UTIL.formatTimestamp(new Date().getTime(), 'MM-dd'));
 
 
-@inject('demoStore')
+@inject('weekStore')
 @observer
 class Home extends React.Component {
   constructor() {
@@ -25,9 +43,6 @@ class Home extends React.Component {
 
   // 渲染项目
   getProject = (project, projectIndex, partIndex) => {
-    if (!project.list || project.list.length === 0) {
-      return null;
-    }
     return (
       <div className="project" key={projectIndex}>
         <div className="project-title paragraph">{project.label}</div>
@@ -100,7 +115,7 @@ class Home extends React.Component {
   // 渲染每一个条目
   getItem = (item, itemIndex, projectIndex, partIndex) => {
     return (
-      <div className="item paragraph" key={itemIndex}>
+      <div className="item paragraph" key={`${partIndex}${projectIndex}${itemIndex}`}>
         <textarea
           className="input"
           value={item.text}
@@ -127,11 +142,12 @@ class Home extends React.Component {
           }}
         />
         <Select
-          className="select-status"
-          value={1}
+          className="select-time"
+          value={item.date}
           searchable={false}
           clearable={false}
-          options={Object.values(weekList)}
+          options={dateList}
+          placeholder={'时间'}
           onChange={(newValue) => {
             this.updateWeek({
               item, itemIndex, projectIndex, partIndex, newValue
@@ -146,13 +162,16 @@ class Home extends React.Component {
           <div className="worker">
             {
               Object.values(workerList).map((worker, i) => {
-                console.log(worker)
+
+                const checkId = `checkbox${partIndex}${projectIndex}${itemIndex}${worker.value}`;
+                const checked = item.worker.includes(worker.value);
                 return (
-                  <span className="check">
+                  <span className="check" key={checkId}>
                     <input
                       type="checkbox"
-                      id={`checkbox${partIndex}${projectIndex}${itemIndex}${worker.value}`}
-                      checked={item.worker.includes(worker.value)}
+                      className="checkbox"
+                      id={checkId}
+                      checked={checked}
                       onChange={(e) => {
                         this.updateWorker({
                           item, itemIndex, projectIndex, partIndex,
@@ -161,7 +180,11 @@ class Home extends React.Component {
                         });
                       }}
                     />
-                    <label htmlFor={`checkbox${partIndex}${projectIndex}${itemIndex}${worker.value}`}>@{worker.label}</label>
+                    <label
+                      className={`label ${checked ? 'checked-label' : ''}`}
+                      htmlFor={checkId}
+                    > @{worker.label}
+                    </label>
                   </span>
                 );
               })
@@ -171,12 +194,28 @@ class Home extends React.Component {
       </div>);
   };
 
+  addCore = () => {
+    this.state.newTemplate[0].push({
+      ...workType.balance,
+      list: []
+    });
+    this.setState({
+      newTemplate: this.state.newTemplate
+    })
+
+  };
+
+  save = () => {
+    this.props.weekStore.setReport(this.state.newTemplate);
+  };
+
   render() {
     const { newTemplate } = this.state;
     return (
       <div className="edit-container">
+        <button onClick={this.save}>save</button>
         <div className="core">
-          <div className="title paragraph">核心工作要点:</div>
+          <div className="title paragraph">核心工作要点: <button onClick={this.addCore}>add</button></div>
           {
             newTemplate[0].map((project, i) => {
               return this.getProject(project, i, 0);
@@ -197,9 +236,19 @@ class Home extends React.Component {
         </div>
         <div className="detail">
           <div className="title paragraph">详细进展：</div>
+          {
+            newTemplate[2].map((project, i) => {
+              return this.getProject(project, i, 0);
+            })
+          }
         </div>
         <div className="next">
           <div className="title paragraph">下周计划：</div>
+          {
+            newTemplate[3].map((project, i) => {
+              return this.getProject(project, i, 0);
+            })
+          }
         </div>
       </div>
     );

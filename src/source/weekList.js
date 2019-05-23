@@ -23,7 +23,7 @@ export default {
     label: "周六",
     value: 6,
   },
-  7: {
+  0: {
     label: "周日",
     value: 7,
   }

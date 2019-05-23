@@ -6,6 +6,7 @@ export default {
   0: [
     {
       ...workType.balance,
+      project: workType.balance.value,
       list: [
         {
           text: "国际站个人KYC新老mobx store合并，统一数据源优化国际站个人KYC新老mobx store合并，统一数据源优化",
@@ -27,6 +28,7 @@ export default {
     },
     {
       ...workType.account,
+      project: workType.account.value,
       list: [
         {
           text: "国际站个人KYC新老mobx store合并，统一数据源优化",
@@ -48,18 +50,22 @@ export default {
     },
     {
       ...workType.broker,
+      project: workType.broker.value,
       list: []
     },
     {
       ...workType.pool,
+      project: workType.pool.value,
       list: []
     },
     {
       ...workType.oklink,
+      project: workType.oklink.value,
       list: []
     },
     {
       ...workType.okjp,
+      project: workType.okjp.value,
       list: [
         {
           text: "国际站个人KYC新老mobx store合并，统一数据源优化",
@@ -81,14 +87,17 @@ export default {
     },
     {
       ...workType.activity,
+      project: workType.activity.value,
       list: []
     },
     {
       ...workType.okex,
+      project: workType.okex.value,
       list: []
     },
     {
       ...workType.okcoin,
+      project: workType.okcoin.value,
       list: []
     }
   ],
@@ -105,30 +114,37 @@ export default {
   2: [
     {
       ...workType.balance,
+      project: workType.balance.value,
       list: []
     },
     {
       ...workType.account,
+      project: workType.account.value,
       list: []
     },
     {
       ...workType.pool,
+      project: workType.pool.value,
       list: []
     },
     {
       ...workType.oklink,
+      project: workType.oklink.value,
       list: []
     },
     {
       ...workType.balance,
+      project: workType.balance.value,
       list: []
     },
     {
       ...workType.okex,
+      project: workType.okex.value,
       list: []
     },
     {
       ...workType.okcoin,
+      project: workType.okcoin.value,
       list: []
     }
   ],

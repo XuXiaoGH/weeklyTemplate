@@ -10,7 +10,7 @@ import workerList from '../../source/workerList';
 
 const temp = UTIL.deepCopy(template);
 
-@inject('demoStore')
+@inject('weekStore')
 @observer
 class Home extends React.Component {
 

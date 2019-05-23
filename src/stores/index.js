@@ -2,8 +2,8 @@
  * mobx store
  */
 
-import demoStore from './demoStore';
+import weekStore from './weekStore';
 
 export default {
-  demoStore
+  weekStore
 };

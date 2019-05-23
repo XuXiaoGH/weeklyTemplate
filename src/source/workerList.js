@@ -1,8 +1,4 @@
 export default {
-  1: {
-    label: "张裕鑫",
-    value: 1
-  },
   2: {
     label: "杨青青",
     value: 2,
@@ -22,5 +18,9 @@ export default {
   6: {
     label: "王川",
     value: 6,
-  }
+  },
+  99: {
+    label: "张裕鑫",
+    value: 1
+  },
 };
