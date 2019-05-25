@@ -1,23 +1,55 @@
-.core, .problem, .detail, .next {
-  color: #000;
-  font-size: 14px;
+@import "../../less/constants";
 
-  .paragraph {
-    white-space: pre-wrap;
-    line-height: 1.75;
+.view-container {
+  .contaner2 {
+    counter-reset: number 1;
   }
-  .title {
-    font-size: 18px;
-    color: rgb(0, 112, 192);
-    font-weight: bold;
+
+  .contaner2:before {
+    content: counter(number);
   }
-  .project-title {
-    font-weight: bold;
+  .core, .problem, .detail, .next {
+    color: #000;
+    font-size: 14px;
+
+    .paragraph {
+      white-space: pre-wrap;
+      line-height: 1.75;
+    }
+    .title {
+      font-size: 18px;
+      color: rgb(0, 112, 192);
+      font-weight: bold;
+    }
+    .project-title {
+      font-weight: bold;
+    }
+  }
+
+  .worker-box {
+    text-align: right;
+    padding: 5px 0;
+    margin-bottom: 30px;
+    border-bottom: 1px dashed @lineColor;
+    cursor: pointer;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    .worker {
+      cursor: pointer;
+      color: lightgray;
+    }
+    .checked {
+      color: @mainColor;
+    }
+  }
+
+  .problem {
+    .title {
+      color: rgb(255, 0, 0);
+    }
   }
 }
 
-.problem {
-  .title {
-    color: rgb(255, 0, 0);
-  }
-}
+

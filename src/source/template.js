@@ -6,148 +6,104 @@ export default {
   0: [
     {
       ...workType.balance,
-      project: workType.balance.value,
       list: [
-        {
-          text: "国际站个人KYC新老mobx store合并，统一数据源优化国际站个人KYC新老mobx store合并，统一数据源优化",
-          status: 1,
-          date: "5.15",
-          worker: [1, 2],
-        }, {
-          text: "账户和安全页面优化需求",
-          status: 2,
-          date: "预计下周一提测",
-          worker: [1, 2],
-        }, {
-          text: "充币自动划转至指定交易账户需求，开发完成待联调，预计22日提测",
-          status: "5",
-          date: "",
-          worker: [],
-        }
       ]
     },
     {
       ...workType.account,
-      project: workType.account.value,
       list: [
-        {
-          text: "国际站个人KYC新老mobx store合并，统一数据源优化",
-          status: 3,
-          date: "5.15",
-          worker: [1, 2],
-        }, {
-          text: "账户和安全页面优化需求",
-          status: 4,
-          date: "预计下周一提测",
-          worker: [1, 2],
-        }, {
-          text: "充币自动划转至指定交易账户需求，开发完成待联调，预计22日提测",
-          status: 5,
-          date: "",
-          worker: [],
-        }
       ]
     },
     {
       ...workType.broker,
-      project: workType.broker.value,
       list: []
     },
     {
       ...workType.pool,
-      project: workType.pool.value,
       list: []
     },
     {
       ...workType.oklink,
-      project: workType.oklink.value,
       list: []
     },
     {
       ...workType.okjp,
-      project: workType.okjp.value,
       list: [
-        {
-          text: "国际站个人KYC新老mobx store合并，统一数据源优化",
-          status: 6,
-          date: "5.15",
-          worker: [1, 2],
-        }, {
-          text: "账户和安全页面优化需求",
-          status: 7,
-          date: "预计下周一提测",
-          worker: [1, 2],
-        }, {
-          text: "充币自动划转至指定交易账户需求，开发完成待联调，预计22日提测",
-          status: 8,
-          date: "",
-          worker: [],
-        }
       ]
     },
     {
       ...workType.activity,
-      project: workType.activity.value,
       list: []
     },
     {
       ...workType.okex,
-      project: workType.okex.value,
       list: []
     },
     {
       ...workType.okcoin,
-      project: workType.okcoin.value,
       list: []
     }
   ],
   // 问题故障
   1: [
     {
-      text: "国际站个人KYC新老mobx store合并，统一数据源优化",
-      status: 1,
-      date: "5.15",
-      worker: [1, 2],
-    },
+      list: []
+    }
   ],
   // 详细进展
   2: [
     {
       ...workType.balance,
-      project: workType.balance.value,
-      list: []
+      list: [
+      ]
     },
     {
       ...workType.account,
-      project: workType.account.value,
+      list: [
+      ]
+    },
+    {
+      ...workType.broker,
       list: []
     },
     {
       ...workType.pool,
-      project: workType.pool.value,
       list: []
     },
     {
       ...workType.oklink,
-      project: workType.oklink.value,
       list: []
     },
     {
-      ...workType.balance,
-      project: workType.balance.value,
+      ...workType.okjp,
+      list: [
+      ]
+    },
+    {
+      ...workType.activity,
       list: []
     },
     {
       ...workType.okex,
-      project: workType.okex.value,
       list: []
     },
     {
       ...workType.okcoin,
-      project: workType.okcoin.value,
+      list: []
+    },
+    {
+      ...workType.base,
+      list: []
+    },
+    {
+      ...workType.ghost,
       list: []
     }
   ],
   // 下周计划
-  3: []
+  3: [
+    {
+      list: []
+    }
+  ]
 }

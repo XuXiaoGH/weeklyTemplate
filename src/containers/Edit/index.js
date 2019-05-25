@@ -2,6 +2,7 @@ import React from 'react';
 import { inject, observer } from 'mobx-react';
 import { hot } from 'react-hot-loader';
 import Select from 'react-select';
+import { Dialog } from '@ok/Dialog';
 import './index.less';
 
 import UTIL from '../../utils/util';
@@ -9,7 +10,6 @@ import template from '../../source/template';
 import statusList from '../../source/statusList';
 import workerList from '../../source/workerList';
 import weekList from '../../source/weekList';
-import workType from "../../source/projectList";
 
 const ONE_DAY = 24 * 60 * 60 * 1000;
 const workerIdList = Object.keys(workerList);
@@ -27,8 +27,10 @@ for (let i = week + 1; i <= 6; i++) {
     value: UTIL.formatTimestamp(new Date().getTime() + ONE_DAY * (i - week), 'MM-dd')
   })
 }
-console.log(dateList);
-console.log(UTIL.formatTimestamp(new Date().getTime(), 'MM-dd'));
+dateList.push({
+  label: '无',
+  value: ' '
+})
 
 
 @inject('weekStore')
@@ -36,8 +38,25 @@ console.log(UTIL.formatTimestamp(new Date().getTime(), 'MM-dd'));
 class Home extends React.Component {
   constructor() {
     super();
+    const localWeekly = JSON.parse(localStorage.getItem('weekly'));
     this.state = {
-      newTemplate: UTIL.deepCopy(template)
+      newTemplate: localWeekly ? localWeekly : UTIL.deepCopy(template),
+      currentWorker: '',
+      showWorkerDialog: false
+    }
+  }
+
+  componentDidMount() {
+
+    const currentWorker = localStorage.getItem('currentWorker');
+    if (!currentWorker) {
+      this.setState({
+        showWorkerDialog: true
+      });
+    } else {
+      this.setState({
+        currentWorker
+      });
     }
   }
 
@@ -45,13 +64,24 @@ class Home extends React.Component {
   getProject = (project, projectIndex, partIndex) => {
     return (
       <div className="project" key={projectIndex}>
-        <div className="project-title paragraph">{project.label}</div>
-        {
-          project.list && project.list.map((item, itemIndex) => {
-            return this.getItem(item, itemIndex, projectIndex, partIndex);
-          })
-        }
-        <div className="item paragraph"><br /></div>
+        <div className="project-title paragraph">{project.label}
+          <span
+            className="add-btn"
+            onClick={() => {
+              this.addItem({
+                projectIndex, partIndex
+              })
+            }}
+          >+
+          </span>
+        </div>
+        <div>
+          {
+            project.list && project.list.map((item, itemIndex) => {
+              return this.getItem({ item, itemIndex, projectIndex, partIndex });
+            })
+          }
+        </div>
       </div>
     );
   };
@@ -113,53 +143,55 @@ class Home extends React.Component {
   };
 
   // 渲染每一个条目
-  getItem = (item, itemIndex, projectIndex, partIndex) => {
+  getItem = ({ item, itemIndex, projectIndex, partIndex }) => {
     return (
       <div className="item paragraph" key={`${partIndex}${projectIndex}${itemIndex}`}>
-        <textarea
-          className="input"
-          value={item.text}
-          data-part-index={partIndex}
-          data-project-index={projectIndex}
-          data-item-index={itemIndex}
-          onChange={(e) => {
-            this.updateText({
-              item, itemIndex, projectIndex, partIndex,
-              val: e.target.value
-            });
-          }}
-        />
-        <Select
-          className="select-status"
-          value={statusList[Number(item.status)].value}
-          searchable={false}
-          clearable={false}
-          options={Object.values(statusList)}
-          onChange={(newValue) => {
-            this.updateStatus({
-              item, itemIndex, projectIndex, partIndex, newValue
-            });
-          }}
-        />
-        <Select
-          className="select-time"
-          value={item.date}
-          searchable={false}
-          clearable={false}
-          options={dateList}
-          placeholder={'时间'}
-          onChange={(newValue) => {
-            this.updateWeek({
-              item, itemIndex, projectIndex, partIndex, newValue
-            });
-          }}
-        />
-        {/*{*/}
-        {/*item.date && <span className="text">（{item.date}）</span>*/}
-        {/*}*/}
-        ；
-        {
-          <div className="worker">
+        <div className="input-area">
+          <textarea
+            className="input"
+            value={item.text}
+            data-part-index={partIndex}
+            data-project-index={projectIndex}
+            data-item-index={itemIndex}
+            placeholder={'工作描述：用简练的语言让一个不知道的人听明白'}
+            onChange={(e) => {
+              this.updateText({
+                item, itemIndex, projectIndex, partIndex,
+                val: e.target.value
+              });
+            }}
+          />
+          <Select
+            className="select-status"
+            value={statusList[Number(item.status)] ? statusList[Number(item.status)].value : "'"}
+            searchable={false}
+            clearable={false}
+            options={Object.values(statusList)}
+            placeholder={'状态'}
+            onChange={(newValue) => {
+              this.updateStatus({
+                item, itemIndex, projectIndex, partIndex, newValue
+              });
+            }}
+          />
+          <Select
+            className="select-time"
+            value={item.date}
+            searchable={false}
+            clearable={false}
+            options={dateList}
+            placeholder={'时间'}
+            onChange={(newValue) => {
+              this.updateWeek({
+                item, itemIndex, projectIndex, partIndex, newValue
+              });
+            }}
+          />
+          {/*{*/}
+          {/*item.date && <span className="text">（{item.date}）</span>*/}
+          {/*}*/}
+          {
+            <span className="worker">
             {
               Object.values(workerList).map((worker, i) => {
 
@@ -189,67 +221,145 @@ class Home extends React.Component {
                 );
               })
             }
-          </div>
-        }
-      </div>);
+          </span>
+          }
+        </div>
+        <span
+          className="del-btn"
+          onClick={() => {
+            this.delItem({
+              projectIndex, partIndex, itemIndex
+            })
+          }}
+        >-
+          </span>
+      </div>
+    );
   };
 
-  addCore = () => {
-    this.state.newTemplate[0].push({
-      ...workType.balance,
-      list: []
+  addItem = ({ projectIndex, partIndex }) => {
+    const { newTemplate } = this.state;
+    newTemplate[partIndex][projectIndex].list.push({
+      text: "",
+      status: "",
+      date: "",
+      worker: [Number(this.state.currentWorker)],
     });
     this.setState({
-      newTemplate: this.state.newTemplate
+      newTemplate
     })
+  };
 
+
+  delItem = ({ projectIndex, partIndex, itemIndex }) => {
+    const { newTemplate } = this.state;
+    newTemplate[partIndex][projectIndex].list.splice(itemIndex, 1);
+    this.setState({
+      newTemplate
+    })
   };
 
   save = () => {
     this.props.weekStore.setReport(this.state.newTemplate);
+    localStorage.setItem('weekly', JSON.stringify(this.state.newTemplate));
   };
+
+  onConfirmWorker = () => {
+    localStorage.setItem('currentWorker', this.state.currentWorker);
+    this.setState({
+      showWorkerDialog: false
+    });
+  };
+
+  onChangeWorker = (newValue) => {
+    this.setState({
+      currentWorker: newValue.value
+    });
+  };
+
 
   render() {
     const { newTemplate } = this.state;
+    const core = newTemplate[0];
+    const problem = newTemplate[1];
+    const detail = newTemplate[2];
+    const next = newTemplate[3];
     return (
       <div className="edit-container">
-        <button onClick={this.save}>save</button>
+        <div id="showKey" className="save-btn on" onClick={this.save}>保存</div>
         <div className="core">
-          <div className="title paragraph">核心工作要点: <button onClick={this.addCore}>add</button></div>
+          <div className="title paragraph">核心工作要点:</div>
           {
-            newTemplate[0].map((project, i) => {
+            core.map((project, i) => {
               return this.getProject(project, i, 0);
             })
           }
         </div>
         <div className="problem">
-          <div className="title paragraph">本周问题/故障：</div>
-          {
-            newTemplate[1] && newTemplate[1].length !== 0 && newTemplate[1].map((item, index) => {
-              return this.getItem(item, index, 1, 1);
-            })
-          }
-          {
-            newTemplate[1] && newTemplate[1].length !== 0 &&
-            <div className="item paragraph"><br /></div>
-          }
+          <div className="title paragraph">本周问题/故障：
+            <span
+              className="add-btn"
+              onClick={() => {
+                this.addItem({
+                  projectIndex: 0, partIndex: 1
+                })
+              }}
+            >+
+          </span>
+          </div>
+          <div>
+            {
+              problem[0].list.map((item, index) => {
+                return this.getItem({ item, itemIndex: index, projectIndex: 0, partIndex: 1 });
+              })
+            }
+          </div>
         </div>
         <div className="detail">
           <div className="title paragraph">详细进展：</div>
           {
-            newTemplate[2].map((project, i) => {
-              return this.getProject(project, i, 0);
+            detail.map((project, i) => {
+              return this.getProject(project, i, 2);
             })
           }
         </div>
         <div className="next">
-          <div className="title paragraph">下周计划：</div>
-          {
-            newTemplate[3].map((project, i) => {
-              return this.getProject(project, i, 0);
-            })
-          }
+          <div className="title paragraph">下周计划：
+            <span
+              className="add-btn"
+              onClick={() => {
+                this.addItem({
+                  projectIndex: 0, partIndex: 3
+                })
+              }}
+            >+
+          </span>
+          </div>
+          <div>
+            {
+              next[0].list.map((item, index) => {
+                return this.getItem({ item, itemIndex: index, projectIndex: 0, partIndex: 3 });
+              })
+            }
+          </div>
         </div>
+
+        <Dialog
+          visible={this.state.showWorkerDialog}
+          confirmText='确定'
+          hideCloseBtn={true}
+          onConfirm={this.onConfirmWorker}
+        >
+          <Select
+            className="select-time"
+            value={this.state.currentWorker}
+            searchable={false}
+            clearable={false}
+            onChange={this.onChangeWorker}
+            options={Object.values(workerList)}
+            placeholder={'当前工作人员'}
+          />
+        </Dialog>
       </div>
     );
   }

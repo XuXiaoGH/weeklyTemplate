@@ -34,5 +34,9 @@ export default {
   9: {
     label: "已完成",
     value: 9,
+  },
+  10: {
+    label: "已发布",
+    value: 10,
   }
 };
