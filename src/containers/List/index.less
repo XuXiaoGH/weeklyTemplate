@@ -1,0 +1,97 @@
+@import "../../less/constants";
+
+.view-container {
+  .contaner2 {
+    counter-reset: number 1;
+  }
+
+  .contaner2:before {
+    content: counter(number);
+  }
+  .core, .problem, .detail, .next {
+    color: #000;
+    font-size: 14px;
+
+    .paragraph {
+      white-space: pre-wrap;
+      line-height: 1.75;
+    }
+    .title {
+      font-size: 18px;
+      color: rgb(0, 112, 192);
+      font-weight: bold;
+    }
+    .project-title {
+      font-weight: bold;
+    }
+  }
+
+  .worker-box {
+    text-align: right;
+    padding: 5px 0;
+    margin-bottom: 30px;
+    border-bottom: 1px dashed @lineColor;
+    cursor: pointer;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    .worker {
+      cursor: pointer;
+      color: lightgray;
+    }
+    .checked {
+      color: @mainColor;
+    }
+
+    .edit-btn {
+      margin-left: 25px;
+      display: inline-block;
+      vertical-align: text-top;
+      font-size: 14px;
+      padding: 0 10px;
+      line-height: 20px;
+      text-align: center;
+      border-radius: 2px;
+      border: 1px solid @mainColor;
+      color: @mainColor;
+      cursor: pointer;
+    }
+  }
+
+  .problem {
+    .title {
+      color: rgb(255, 0, 0);
+    }
+  }
+}
+
+.save-btn {
+  position: fixed;
+  cursor: pointer;
+  top: 250px;
+  right: 130px;
+  width: 80px;
+  height: 80px;
+  line-height: 80px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  box-shadow: 0 1px 15px 0 pink;
+  text-align: center;
+  z-index: 9999;
+  text-decoration: none;
+
+  &.on {
+    box-shadow: 0 1px 15px 0 @switchOnColor;
+    color: @switchOnColor;
+  }
+
+  &:hover {
+    box-shadow: 0 1px 15px 0 @successIconColor;
+    color: @successIconColor;
+  }
+
+}
+
+
+

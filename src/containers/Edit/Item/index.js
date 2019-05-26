@@ -1,17 +1,21 @@
 import React from 'react';
-import Icon from "@ok/IconLite";
-import RootContext from "../../../RootContext";
-import Message from "@ok/Message";
+import Icon from '@ok/IconLite';
+import Message from '@ok/Message';
 import Select from 'react-select';
+import RootContext from '../../RootContext';
+
 
 const SORT_STEP = 100;
 
 export default class Item extends RootContext {
-
-
   // 保存或更新条目
-  saveItem = ({ item, itemIndex, projectId, partId, newSort }) => {
-    const { weekSign, date, text, status, worker, id, sort } = item;
+  saveItem = (props) => {
+    const {
+      item, itemIndex, projectId, partId, newSort
+    } = props;
+    const {
+      weekSign, date, text, status, worker, id, sort
+    } = item;
     let weekly = {};
     if (id) {
       weekly = window.AV.Object.createWithoutData('weekly', id);
@@ -38,18 +42,21 @@ export default class Item extends RootContext {
   };
 
   upItem = (props) => {
-    const { project, item, itemIndex, projectId, partId } = props;
+    const {
+      project, item, itemIndex, projectId, partId
+    } = props;
     const lastSort = project[itemIndex - 1].sort;
     const last2Sort = project[itemIndex - 2] ? project[itemIndex - 2].sort : lastSort - 2 * SORT_STEP;
-    this.saveItem(Object.assign(props, { newSort: lastSort - (lastSort - last2Sort) / 2 }))
-
+    this.saveItem(Object.assign(props, { newSort: lastSort - (lastSort - last2Sort) / 2 }));
   };
   downItem = (props) => {
-    const { project, item, itemIndex, projectId, partId } = props;
+    const {
+      project, item, itemIndex, projectId, partId
+    } = props;
     const nextSort = project[itemIndex + 1].sort;
     const next2Sort = project[itemIndex + 2] ? project[itemIndex + 2].sort : nextSort + 2 * SORT_STEP;
 
-    this.saveItem(Object.assign(props, { newSort: nextSort + (next2Sort - nextSort) / 2 }))
+    this.saveItem(Object.assign(props, { newSort: nextSort + (next2Sort - nextSort) / 2 }));
   };
 
   render() {
@@ -63,7 +70,7 @@ export default class Item extends RootContext {
           onClick={() => {
             this.props.delItem({
               item, projectId, partId, itemIndex
-            })
+            });
           }}
         >-
         </span>
@@ -74,10 +81,13 @@ export default class Item extends RootContext {
             data-part-index={partId}
             data-project-index={projectId}
             data-item-index={itemIndex}
-            placeholder={'工作描述：用简练的语言让一个不知道的人听明白'}
+            placeholder="工作描述：用简练的语言让一个不知道的人听明白"
             onChange={(e) => {
               this.props.updateText({
-                item, itemIndex, projectId, partId,
+                item,
+                itemIndex,
+                projectId,
+                partId,
                 val: e.target.value
               });
             }}
@@ -88,7 +98,7 @@ export default class Item extends RootContext {
             searchable={false}
             clearable={false}
             options={Object.values(statusList)}
-            placeholder={'状态'}
+            placeholder="状态"
             onChange={(newValue) => {
               this.props.updateStatus({
                 item, itemIndex, projectId, partId, newValue
@@ -101,7 +111,7 @@ export default class Item extends RootContext {
             searchable={false}
             clearable={false}
             options={this.dateList}
-            placeholder={'时间'}
+            placeholder="时间"
             onChange={(newValue) => {
               this.props.updateWeek({
                 item, itemIndex, projectId, partId, newValue
@@ -110,13 +120,12 @@ export default class Item extends RootContext {
           />
           {
             <span className="worker">
-            {
-              Object.values(workerList).map((worker, i) => {
-
-                const checkId = `checkbox${partId}${projectId}${itemIndex}${worker.value}`;
-                const checked = item.worker.includes(worker.value);
-                return (
-                  <span className="check" key={checkId}>
+              {
+                Object.values(workerList).map((worker, i) => {
+                  const checkId = `checkbox${partId}${projectId}${itemIndex}${worker.value}`;
+                  const checked = item.worker.includes(worker.value);
+                  return (
+                    <span className="check" key={checkId}>
                     <input
                       type="checkbox"
                       className="checkbox"
@@ -124,7 +133,10 @@ export default class Item extends RootContext {
                       checked={checked}
                       onChange={(e) => {
                         this.props.updateWorker({
-                          item, itemIndex, projectId, partId,
+                          item,
+                          itemIndex,
+                          projectId,
+                          partId,
                           workerId: worker.value,
                           val: e.target.checked
                         });
@@ -136,43 +148,40 @@ export default class Item extends RootContext {
                     > @{worker.label}
                     </label>
                   </span>
-                );
-              })
-            }
-          </span>
+                  );
+                })
+              }
+            </span>
           }
         </div>
 
         <span onClick={() => {
-          this.saveItem({ item, itemIndex, projectId, partId });
-        }}>
+          this.saveItem({
+            item, itemIndex, projectId, partId
+          });
+        }}
+        >
           <Icon className="iconsave save-item-btn" />
-       </span>
+        </span>
 
-        {
-          itemIndex !== 0 &&
-          <span
-            className="sort-btn"
-            onClick={() => {
-              this.upItem({
-                project, item, projectId, partId, itemIndex
-              })
-            }}
-          >↑
+        <span
+          className={`sort-btn ${itemIndex === 0 ? 'disabled' : ''}`}
+          onClick={() => {
+            this.upItem({
+              project, item, projectId, partId, itemIndex
+            });
+          }}
+        >↑
         </span>
-        }
-        {
-          itemIndex !== project.length - 1 &&
-          <span
-            className="sort-btn"
-            onClick={() => {
-              this.downItem({
-                project, item, projectId, partId, itemIndex
-              })
-            }}
-          >↓
+        <span
+          className={`sort-btn ${itemIndex === project.length - 1 ? 'disabled' : ''}`}
+          onClick={() => {
+            this.downItem({
+              project, item, projectId, partId, itemIndex
+            });
+          }}
+        >↓
         </span>
-        }
       </div>
     );
   }

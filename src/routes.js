@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Switch, Route } from 'react-router-dom';
+import { HashRouter, Switch, Route } from 'react-router-dom';
 import App from './containers/App';
 import Home from './containers/Home';
 import Edit from './containers/Edit';
@@ -20,7 +20,7 @@ const routeMap = [
 ];
 
 export default (
-  <BrowserRouter>
+  <HashRouter>
     <App>
       <Switch>
         {
@@ -37,5 +37,5 @@ export default (
         }
       </Switch>
     </App>
-  </BrowserRouter>
+  </HashRouter>
 );

@@ -1,14 +1,13 @@
 import React from 'react';
 import { inject, observer } from 'mobx-react';
+import { Link } from 'react-router-dom';
 import { hot } from 'react-hot-loader';
 import Select from 'react-select';
 import { Dialog } from '@ok/Dialog';
-import Icon from '@ok/IconLite';
 import Message from '@ok/Message';
 import './index.less';
-import RootContext from "../../RootContext";
-import { Link } from "react-router-dom";
-import Item from "./Item";
+import RootContext from '../RootContext';
+import Item from './Item';
 
 
 @inject('weekStore')
@@ -20,7 +19,7 @@ class Home extends RootContext {
       newTemplate: null,
       currentWorker: '',
       showWorkerDialog: false
-    }
+    };
   }
 
   componentWillMount() {
@@ -31,7 +30,6 @@ class Home extends RootContext {
   }
 
   componentDidMount() {
-
     const currentWorker = localStorage.getItem('currentWorker');
     if (!currentWorker) {
       this.setState({
@@ -51,24 +49,26 @@ class Home extends RootContext {
   // 获取周报
   getWeekly = () => {
     const { weekStore } = this.props;
-    let query = new window.AV.Query('weekly');
     const newWeekly = {
       0: {},
       1: {},
       2: {},
       3: {},
     };
+    const query = new window.AV.Query('weekly');
     query.equalTo('weekSign', this.weekSign);
     query.find().then((res) => {
       res.forEach((item) => {
-        const { weekSign, part, project, sort, text, status, date, worker } = item.attributes;
+        const {
+          weekSign, part, project, sort, text, status, date, worker
+        } = item.attributes;
         if (!newWeekly[part][project]) {
           newWeekly[part][project] = [];
         }
         newWeekly[part][project].push(Object.assign({ id: item.id }, item.attributes));
         newWeekly[part][project].sort((a, b) => {
           return a.sort - b.sort;
-        })
+        });
       });
 
       weekStore.projectList && Object.values(weekStore.projectList).forEach((item) => {
@@ -84,8 +84,10 @@ class Home extends RootContext {
       newWeekly[3][0] = !newWeekly[3][0] ? [] : newWeekly[3][0];
       this.setState({
         newTemplate: newWeekly
-      }, () => {
       });
+      if (res.length === 0) {
+        this.setWeekList();
+      }
     }, (error) => {
     });
   };
@@ -103,16 +105,18 @@ class Home extends RootContext {
               onClick={() => {
                 this.addItem({
                   projectId, partId
-                })
+                });
               }}
             >+
-          </span>
+            </span>
           </div>
         }
         <div>
           {
             project && project.map((item, itemIndex) => {
-              return this.getItem({ project, item, itemIndex, projectId, partId });
+              return this.getItem({
+                project, item, itemIndex, projectId, partId
+              });
             })
           }
         </div>
@@ -201,18 +205,20 @@ class Home extends RootContext {
   addItem = ({ projectId, partId }) => {
     const { newTemplate } = this.state;
     newTemplate[partId][projectId].push({
-      text: "",
-      status: "",
-      date: "",
+      text: '',
+      status: '',
+      date: '',
       worker: [Number(this.state.currentWorker)],
     });
     this.setState({
       newTemplate
-    })
+    });
   };
 
 
-  delItem = ({ item, projectId, partId, itemIndex }) => {
+  delItem = ({
+    item, projectId, partId, itemIndex
+  }) => {
     const { newTemplate } = this.state;
     newTemplate[partId][projectId].splice(itemIndex, 1);
     this.setState({
@@ -230,6 +236,9 @@ class Home extends RootContext {
   };
 
   onConfirmWorker = () => {
+    if (!this.state.currentWorker) {
+      return;
+    }
     localStorage.setItem('currentWorker', this.state.currentWorker);
     this.setState({
       showWorkerDialog: false
@@ -256,64 +265,73 @@ class Home extends RootContext {
     const next = newTemplate[3];
     return (
       <div className="edit-container">
-        <Link id="showKey" className="save-btn on" to="/">返回查看</Link>
-        <div className="core">
-          <div className="title paragraph">核心工作要点:</div>
-          {
-            Object.entries(core).map((project) => {
-              return this.getProject(project[1], project[0], 0);
-            })
-          }
-        </div>
-        <div className="problem">
-          <div className="title paragraph">本周问题/故障：
-            <span
-              className="add-btn"
-              onClick={() => {
-                this.addItem({ projectId: 0, partId: 1 })
-              }}
-            >+
-          </span>
-          </div>
+        {
+          this.state.currentWorker &&
           <div>
-            {
-              problem[0] && problem[0].map((item, index) => {
-                return this.getItem({ project: problem[0], item, itemIndex: index, projectId: 0, partId: 1 });
-              })
-            }
+            <Link id="showKey" className="save-btn on" to="/">返回查看</Link>
+            <div className="core">
+              <div className="title paragraph">核心工作要点:</div>
+              {
+                Object.entries(core).map((project) => {
+                  return this.getProject(project[1], project[0], 0);
+                })
+              }
+            </div>
+            <div className="problem">
+              <div className="title paragraph">本周问题/故障：
+                <span
+                  className="add-btn"
+                  onClick={() => {
+                    this.addItem({ projectId: 0, partId: 1 });
+                  }}
+                >+
+                </span>
+              </div>
+              <div>
+                {
+                  problem[0] && problem[0].map((item, index) => {
+                    return this.getItem({
+                      project: problem[0], item, itemIndex: index, projectId: 0, partId: 1
+                    });
+                  })
+                }
+              </div>
+            </div>
+            <div className="detail">
+              <div className="title paragraph">详细进展：</div>
+              {
+                Object.entries(detail).map((project) => {
+                  return this.getProject(project[1], project[0], 2);
+                })
+              }
+            </div>
+            <div className="next">
+              <div className="title paragraph">下周计划：
+                <span
+                  className="add-btn"
+                  onClick={() => {
+                    this.addItem({ projectId: 0, partId: 3 });
+                  }}
+                >+
+                </span>
+              </div>
+              <div>
+                {
+                  next[0] && next[0].map((item, index) => {
+                    return this.getItem({
+                      project: next[0], item, itemIndex: index, projectId: 0, partId: 3
+                    });
+                  })
+                }
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="detail">
-          <div className="title paragraph">详细进展：</div>
-          {
-            Object.entries(detail).map((project) => {
-              return this.getProject(project[1], project[0], 2);
-            })
-          }
-        </div>
-        <div className="next">
-          <div className="title paragraph">下周计划：
-            <span
-              className="add-btn"
-              onClick={() => {
-                this.addItem({ projectId: 0, partId: 3 })
-              }}
-            >+
-          </span>
-          </div>
-          <div>
-            {
-              next[0] && next[0].map((item, index) => {
-                return this.getItem({ project: next[0], item, itemIndex: index, projectId: 0, partId: 3 });
-              })
-            }
-          </div>
-        </div>
+        }
 
         <Dialog
           visible={this.state.showWorkerDialog}
-          confirmText='确定'
-          hideCloseBtn={true}
+          confirmText="确定"
+          hideCloseBtn
           onConfirm={this.onConfirmWorker}
         >
           <Select
@@ -323,8 +341,9 @@ class Home extends RootContext {
             clearable={false}
             onChange={this.onChangeWorker}
             options={Object.values(workerList)}
-            placeholder={'当前工作人员'}
+            placeholder="当前工作人员"
           />
+          <div className="tips">选错了自己清localStorage</div>
         </Dialog>
       </div>
     );

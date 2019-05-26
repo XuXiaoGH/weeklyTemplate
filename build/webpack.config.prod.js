@@ -18,7 +18,6 @@ base.plugins.unshift(
 );
 
 const isDaily = process.env.ASSETS_BUILD_TYPE === 'daily';
-
 if (isDaily) {
   base.devtool = 'source-map';
 }
@@ -26,11 +25,11 @@ if (isDaily) {
 module.exports = Object.assign(base, {
   optimization: {
     minimizer: [
-      new UglifyJsPlugin({
-        cache: true,
-        parallel: true,
-        sourceMap: isDaily
-      }),
+      // new UglifyJsPlugin({
+      //   cache: true,
+      //   parallel: true,
+      //   sourceMap: isDaily
+      // }),
       new OptimizeCSSAssetsPlugin({
         cssProcessorOptions: { safe: true, discardComments: { removeAll: true } },
       })

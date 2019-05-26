@@ -123,7 +123,7 @@
       margin-top: 25px;
     }
     .project-title {
-      font-weight: bold;
+      //font-weight: bold;
       font-size: 20px;
       margin-top: 25px;
     }
@@ -177,10 +177,21 @@
       color: @mainColor;
       cursor: pointer;
 
-      .disabled {
+      &.disabled {
         pointer-events: none;
         visibility: hidden;
       }
+    }
+  }
+
+  .core {
+    .title, .project-title {
+      color: #339999;
+    }
+  }
+  .detail {
+    .title, .project-title {
+      color: #CC9999;
     }
   }
 
@@ -188,5 +199,11 @@
     .title {
       color: rgb(255, 0, 0);
     }
+  }
+
+  .tips{
+    color: lightgrey;
+    font-size: 14px;
+    margin-top: 5px;
   }
 }
