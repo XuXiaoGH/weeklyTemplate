@@ -3,35 +3,6 @@
 .edit-container {
 
   padding-bottom: 300px;
-
-  @successIconColor: #3dbd7d;
-  @switchOnColor: #5795F1;
-  .save-btn {
-    position: fixed;
-    cursor: pointer;
-    top: 250px;
-    right: 130px;
-    width: 80px;
-    height: 80px;
-    line-height: 80px;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 50%;
-    box-shadow: 0 1px 15px 0 pink;
-    text-align: center;
-    z-index: 9999;
-
-    &.on {
-      box-shadow: 0 1px 15px 0 @switchOnColor;
-      color: @switchOnColor;
-    }
-
-    &:hover {
-      box-shadow: 0 1px 15px 0 @successIconColor;
-      color: @successIconColor;
-    }
-
-  }
-
   .inputPlaceHolder() {
     &::-webkit-input-placeholder {
       color: #CCCCCC;
@@ -173,17 +144,43 @@
     }
 
     .del-btn {
-      margin-left: 10px;
+      margin-right: 10px;
       display: inline-block;
-      font-size: 20px;
-      line-height: 17px;
+      font-size: 14px;
+      line-height: 12px;
       text-align: center;
-      width: 20px;
-      height: 20px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       border: 1px solid @errorIconColor;
       color: @errorIconColor;
       cursor: pointer;
+    }
+
+    .save-item-btn {
+      font-size: 18px;
+      color: @successIconColor;
+      margin-left: 5px;
+      cursor: pointer;
+    }
+
+    .sort-btn {
+      margin-left: 10px;
+      display: inline-block;
+      font-size: 14px;
+      line-height: 14px;
+      text-align: center;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1px solid @mainColor;
+      color: @mainColor;
+      cursor: pointer;
+
+      .disabled {
+        pointer-events: none;
+        visibility: hidden;
+      }
     }
   }
 

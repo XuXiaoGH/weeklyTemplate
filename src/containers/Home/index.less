@@ -43,6 +43,20 @@
     .checked {
       color: @mainColor;
     }
+
+    .edit-btn {
+      margin-left: 25px;
+      display: inline-block;
+      vertical-align: text-top;
+      font-size: 14px;
+      padding: 0 10px;
+      line-height: 20px;
+      text-align: center;
+      border-radius: 2px;
+      border: 1px solid @mainColor;
+      color: @mainColor;
+      cursor: pointer;
+    }
   }
 
   .problem {
@@ -51,5 +65,33 @@
     }
   }
 }
+
+.save-btn {
+  position: fixed;
+  cursor: pointer;
+  top: 250px;
+  right: 130px;
+  width: 80px;
+  height: 80px;
+  line-height: 80px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  box-shadow: 0 1px 15px 0 pink;
+  text-align: center;
+  z-index: 9999;
+  text-decoration: none;
+
+  &.on {
+    box-shadow: 0 1px 15px 0 @switchOnColor;
+    color: @switchOnColor;
+  }
+
+  &:hover {
+    box-shadow: 0 1px 15px 0 @successIconColor;
+    color: @successIconColor;
+  }
+
+}
+
 
 

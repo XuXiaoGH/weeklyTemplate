@@ -48,8 +48,8 @@ export default {
     label: "基础设施",
     value: 10,
   },
-  ghost: {
-    label: "Ghost",
-    value: 11,
-  }
+  // ghost: {
+  //   label: "Ghost",
+  //   value: 11,
+  // }
 };

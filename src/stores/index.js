@@ -2,8 +2,12 @@
  * mobx store
  */
 
-import weekStore from './weekStore';
+import WeekStore from './weekStore';
 
-export default {
-  weekStore
-};
+class RootStore {
+  constructor() {
+    this.weekStore = new WeekStore(this);
+  }
+}
+
+export default new RootStore();

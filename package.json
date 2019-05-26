@@ -49,8 +49,18 @@
     "webpack-dev-server": "^3.1.4"
   },
   "dependencies": {
+    "@ok/Alert": "^0.1.1",
+    "@ok/Button": "0.1.4",
+    "@ok/Checkbox": "0.1.6",
+    "@ok/Dialog": "3.0.7",
+    "@ok/IconLite": "latest",
+    "@ok/LoadableLoading": "0.1.3",
+    "@ok/Loading": "2.0.1",
+    "@ok/Message": "^0.1.1",
+    "@ok/uiParams": "^0.1.11",
     "axios": "^0.18.0",
     "babel-polyfill": "^6.26.0",
+    "leancloud-storage": "^3.13.2",
     "mobx": "^4.3.1",
     "mobx-react": "^5.2.3",
     "react": "^16.4.0",
@@ -58,12 +68,6 @@
     "react-hot-loader": "^4.3.3",
     "react-loadable": "^5.4.0",
     "react-router-dom": "^4.3.1",
-    "react-select": "^1.0.0-rc.10",
-    "@ok/Button": "0.1.4",
-    "@ok/Checkbox": "0.1.6",
-    "@ok/Dialog": "3.0.7",
-    "@ok/LoadableLoading": "0.1.3",
-    "@ok/Loading": "2.0.1",
-    "@ok/uiParams": "^0.1.11"
+    "react-select": "^1.0.0-rc.10"
   }
 }

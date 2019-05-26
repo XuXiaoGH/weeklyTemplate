@@ -3,47 +3,31 @@ import { inject, observer } from 'mobx-react';
 import { hot } from 'react-hot-loader';
 import Select from 'react-select';
 import { Dialog } from '@ok/Dialog';
+import Icon from '@ok/IconLite';
+import Message from '@ok/Message';
 import './index.less';
-
-import UTIL from '../../utils/util';
-import template from '../../source/template';
-import statusList from '../../source/statusList';
-import workerList from '../../source/workerList';
-import weekList from '../../source/weekList';
-
-const ONE_DAY = 24 * 60 * 60 * 1000;
-const workerIdList = Object.keys(workerList);
-const dateList = [];
-const week = new Date().getDay();
-for (let i = 1; i <= week; i++) {
-  dateList.push({
-    label: weekList[i].label,
-    value: UTIL.formatTimestamp(new Date().getTime() - ONE_DAY * (week - i), 'MM-dd')
-  })
-}
-for (let i = week + 1; i <= 6; i++) {
-  dateList.push({
-    label: weekList[i].label,
-    value: UTIL.formatTimestamp(new Date().getTime() + ONE_DAY * (i - week), 'MM-dd')
-  })
-}
-dateList.push({
-  label: '无',
-  value: ' '
-})
+import RootContext from "../../RootContext";
+import { Link } from "react-router-dom";
+import Item from "./Item";
 
 
 @inject('weekStore')
 @observer
-class Home extends React.Component {
+class Home extends RootContext {
   constructor() {
     super();
-    const localWeekly = JSON.parse(localStorage.getItem('weekly'));
     this.state = {
-      newTemplate: localWeekly ? localWeekly : UTIL.deepCopy(template),
+      newTemplate: null,
       currentWorker: '',
       showWorkerDialog: false
     }
+  }
+
+  componentWillMount() {
+    const { weekStore } = this.props;
+    weekStore.init().then((res) => {
+      this.getWeekly();
+    });
   }
 
   componentDidMount() {
@@ -60,25 +44,75 @@ class Home extends React.Component {
     }
   }
 
+  componentWillUnmount() {
+    // this.cancel();
+  }
+
+  // 获取周报
+  getWeekly = () => {
+    const { weekStore } = this.props;
+    let query = new window.AV.Query('weekly');
+    const newWeekly = {
+      0: {},
+      1: {},
+      2: {},
+      3: {},
+    };
+    query.equalTo('weekSign', this.weekSign);
+    query.find().then((res) => {
+      res.forEach((item) => {
+        const { weekSign, part, project, sort, text, status, date, worker } = item.attributes;
+        if (!newWeekly[part][project]) {
+          newWeekly[part][project] = [];
+        }
+        newWeekly[part][project].push(Object.assign({ id: item.id }, item.attributes));
+        newWeekly[part][project].sort((a, b) => {
+          return a.sort - b.sort;
+        })
+      });
+
+      weekStore.projectList && Object.values(weekStore.projectList).forEach((item) => {
+        if (newWeekly[0] && !newWeekly[0][item.value] && item.isCore) {
+          newWeekly[0][item.value] = [];
+        }
+        if (newWeekly[2] && !newWeekly[2][item.value]) {
+          newWeekly[2][item.value] = [];
+        }
+      });
+      // 初始化问题部分和下周计划部分
+      newWeekly[1][0] = !newWeekly[1][0] ? [] : newWeekly[1][0];
+      newWeekly[3][0] = !newWeekly[3][0] ? [] : newWeekly[3][0];
+      this.setState({
+        newTemplate: newWeekly
+      }, () => {
+      });
+    }, (error) => {
+    });
+  };
+
   // 渲染项目
-  getProject = (project, projectIndex, partIndex) => {
+  getProject = (project, projectId, partId) => {
+    const { weekStore } = this.props;
     return (
-      <div className="project" key={projectIndex}>
-        <div className="project-title paragraph">{project.label}
-          <span
-            className="add-btn"
-            onClick={() => {
-              this.addItem({
-                projectIndex, partIndex
-              })
-            }}
-          >+
+      <div className="project" key={projectId}>
+        {
+          weekStore && weekStore.projectList && weekStore.projectList[projectId] &&
+          <div className="project-title paragraph">{weekStore.projectList[projectId].label}
+            <span
+              className="add-btn"
+              onClick={() => {
+                this.addItem({
+                  projectId, partId
+                })
+              }}
+            >+
           </span>
-        </div>
+          </div>
+        }
         <div>
           {
-            project.list && project.list.map((item, itemIndex) => {
-              return this.getItem({ item, itemIndex, projectIndex, partIndex });
+            project && project.map((item, itemIndex) => {
+              return this.getItem({ project, item, itemIndex, projectId, partId });
             })
           }
         </div>
@@ -88,10 +122,10 @@ class Home extends React.Component {
 
   updateText = (obj) => {
     const {
-      val, itemIndex, projectIndex, partIndex
+      val, itemIndex, projectId, partId
     } = obj;
     const { newTemplate } = this.state;
-    newTemplate[partIndex][projectIndex].list[itemIndex].text = val;
+    newTemplate[partId][projectId][itemIndex].text = val;
     this.setState({
       newTemplate
     });
@@ -99,10 +133,10 @@ class Home extends React.Component {
 
   updateStatus = (obj) => {
     const {
-      newValue, itemIndex, projectIndex, partIndex
+      newValue, itemIndex, projectId, partId
     } = obj;
     const { newTemplate } = this.state;
-    newTemplate[partIndex][projectIndex].list[itemIndex].status = newValue.value;
+    newTemplate[partId][projectId][itemIndex].status = newValue.value;
     this.setState({
       newTemplate
     });
@@ -110,10 +144,10 @@ class Home extends React.Component {
 
   updateWeek = (obj) => {
     const {
-      newValue, itemIndex, projectIndex, partIndex
+      newValue, itemIndex, projectId, partId
     } = obj;
     const { newTemplate } = this.state;
-    newTemplate[partIndex][projectIndex].list[itemIndex].date = newValue.value;
+    newTemplate[partId][projectId][itemIndex].date = newValue.value;
     this.setState({
       newTemplate
     });
@@ -121,125 +155,52 @@ class Home extends React.Component {
 
   updateWorker = (obj) => {
     const {
-      val, itemIndex, projectIndex, partIndex, workerId
+      val, itemIndex, projectId, partId, workerId
     } = obj;
     const { newTemplate } = this.state;
-    const workerList = newTemplate[partIndex][projectIndex].list[itemIndex].worker;
+    const newWorker = newTemplate[partId][projectId][itemIndex].worker;
     let aimIndex = -1;
-    workerList.forEach((item, i) => {
+    newWorker.forEach((item, i) => {
       if (workerId === item) {
         aimIndex = i;
       }
     });
     if (val) {
-      workerList.push(workerId);
+      newWorker.push(workerId);
     } else {
-      workerList.splice(aimIndex, 1);
+      newWorker.splice(aimIndex, 1);
     }
-    newTemplate[partIndex][projectIndex].list[itemIndex].worker = workerList;
+    newTemplate[partId][projectId][itemIndex].worker = newWorker;
     this.setState({
       newTemplate
     });
   };
 
   // 渲染每一个条目
-  getItem = ({ item, itemIndex, projectIndex, partIndex }) => {
+  getItem = (props) => {
+    const { weekStore } = this.props;
+    const { statusList, workerList } = weekStore;
     return (
-      <div className="item paragraph" key={`${partIndex}${projectIndex}${itemIndex}`}>
-        <div className="input-area">
-          <textarea
-            className="input"
-            value={item.text}
-            data-part-index={partIndex}
-            data-project-index={projectIndex}
-            data-item-index={itemIndex}
-            placeholder={'工作描述：用简练的语言让一个不知道的人听明白'}
-            onChange={(e) => {
-              this.updateText({
-                item, itemIndex, projectIndex, partIndex,
-                val: e.target.value
-              });
-            }}
-          />
-          <Select
-            className="select-status"
-            value={statusList[Number(item.status)] ? statusList[Number(item.status)].value : "'"}
-            searchable={false}
-            clearable={false}
-            options={Object.values(statusList)}
-            placeholder={'状态'}
-            onChange={(newValue) => {
-              this.updateStatus({
-                item, itemIndex, projectIndex, partIndex, newValue
-              });
-            }}
-          />
-          <Select
-            className="select-time"
-            value={item.date}
-            searchable={false}
-            clearable={false}
-            options={dateList}
-            placeholder={'时间'}
-            onChange={(newValue) => {
-              this.updateWeek({
-                item, itemIndex, projectIndex, partIndex, newValue
-              });
-            }}
-          />
-          {/*{*/}
-          {/*item.date && <span className="text">（{item.date}）</span>*/}
-          {/*}*/}
-          {
-            <span className="worker">
-            {
-              Object.values(workerList).map((worker, i) => {
-
-                const checkId = `checkbox${partIndex}${projectIndex}${itemIndex}${worker.value}`;
-                const checked = item.worker.includes(worker.value);
-                return (
-                  <span className="check" key={checkId}>
-                    <input
-                      type="checkbox"
-                      className="checkbox"
-                      id={checkId}
-                      checked={checked}
-                      onChange={(e) => {
-                        this.updateWorker({
-                          item, itemIndex, projectIndex, partIndex,
-                          workerId: worker.value,
-                          val: e.target.checked
-                        });
-                      }}
-                    />
-                    <label
-                      className={`label ${checked ? 'checked-label' : ''}`}
-                      htmlFor={checkId}
-                    > @{worker.label}
-                    </label>
-                  </span>
-                );
-              })
-            }
-          </span>
-          }
-        </div>
-        <span
-          className="del-btn"
-          onClick={() => {
-            this.delItem({
-              projectIndex, partIndex, itemIndex
-            })
-          }}
-        >-
-          </span>
-      </div>
+      <Item
+        key={props.itemIndex}
+        {...props}
+        statusList={statusList}
+        workerList={workerList}
+        refresh={this.getWeekly}
+        delItem={this.delItem}
+        addItem={this.addItem}
+        updateText={this.updateText}
+        updateStatus={this.updateStatus}
+        updateWeek={this.updateWeek}
+        updateWorker={this.updateWorker}
+      />
     );
   };
 
-  addItem = ({ projectIndex, partIndex }) => {
+
+  addItem = ({ projectId, partId }) => {
     const { newTemplate } = this.state;
-    newTemplate[partIndex][projectIndex].list.push({
+    newTemplate[partId][projectId].push({
       text: "",
       status: "",
       date: "",
@@ -251,17 +212,21 @@ class Home extends React.Component {
   };
 
 
-  delItem = ({ projectIndex, partIndex, itemIndex }) => {
+  delItem = ({ item, projectId, partId, itemIndex }) => {
     const { newTemplate } = this.state;
-    newTemplate[partIndex][projectIndex].list.splice(itemIndex, 1);
+    newTemplate[partId][projectId].splice(itemIndex, 1);
     this.setState({
       newTemplate
-    })
-  };
-
-  save = () => {
-    this.props.weekStore.setReport(this.state.newTemplate);
-    localStorage.setItem('weekly', JSON.stringify(this.state.newTemplate));
+    });
+    const { id } = item;
+    if (id) {
+      window.AV.Object.createWithoutData('weekly', id).destroy().then((success) => {
+        this.getWeekly();
+        Message.success({ content: '删除成功' });
+      }, (error) => {
+        Message.success({ content: '删除失败' });
+      });
+    }
   };
 
   onConfirmWorker = () => {
@@ -280,18 +245,23 @@ class Home extends React.Component {
 
   render() {
     const { newTemplate } = this.state;
+    if (!newTemplate) {
+      return null;
+    }
+    const { weekStore } = this.props;
+    const { workerList } = weekStore;
     const core = newTemplate[0];
     const problem = newTemplate[1];
     const detail = newTemplate[2];
     const next = newTemplate[3];
     return (
       <div className="edit-container">
-        <div id="showKey" className="save-btn on" onClick={this.save}>保存</div>
+        <Link id="showKey" className="save-btn on" to="/">返回查看</Link>
         <div className="core">
           <div className="title paragraph">核心工作要点:</div>
           {
-            core.map((project, i) => {
-              return this.getProject(project, i, 0);
+            Object.entries(core).map((project) => {
+              return this.getProject(project[1], project[0], 0);
             })
           }
         </div>
@@ -300,17 +270,15 @@ class Home extends React.Component {
             <span
               className="add-btn"
               onClick={() => {
-                this.addItem({
-                  projectIndex: 0, partIndex: 1
-                })
+                this.addItem({ projectId: 0, partId: 1 })
               }}
             >+
           </span>
           </div>
           <div>
             {
-              problem[0].list.map((item, index) => {
-                return this.getItem({ item, itemIndex: index, projectIndex: 0, partIndex: 1 });
+              problem[0] && problem[0].map((item, index) => {
+                return this.getItem({ project: problem[0], item, itemIndex: index, projectId: 0, partId: 1 });
               })
             }
           </div>
@@ -318,8 +286,8 @@ class Home extends React.Component {
         <div className="detail">
           <div className="title paragraph">详细进展：</div>
           {
-            detail.map((project, i) => {
-              return this.getProject(project, i, 2);
+            Object.entries(detail).map((project) => {
+              return this.getProject(project[1], project[0], 2);
             })
           }
         </div>
@@ -328,17 +296,15 @@ class Home extends React.Component {
             <span
               className="add-btn"
               onClick={() => {
-                this.addItem({
-                  projectIndex: 0, partIndex: 3
-                })
+                this.addItem({ projectId: 0, partId: 3 })
               }}
             >+
           </span>
           </div>
           <div>
             {
-              next[0].list.map((item, index) => {
-                return this.getItem({ item, itemIndex: index, projectIndex: 0, partIndex: 3 });
+              next[0] && next[0].map((item, index) => {
+                return this.getItem({ project: next[0], item, itemIndex: index, projectId: 0, partId: 3 });
               })
             }
           </div>

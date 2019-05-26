@@ -1,35 +1,80 @@
 import React from 'react';
 import { inject, observer } from 'mobx-react';
 import { hot } from 'react-hot-loader';
+import { Link } from 'react-router-dom'
 import './index.less';
 
-import UTIL from '../../utils/util';
-import template from '../../source/template';
-import statusList from '../../source/statusList';
-import workerList from '../../source/workerList';
+import RootContext from "../../RootContext";
 
 @inject('weekStore')
 @observer
-class Home extends React.Component {
+class Home extends RootContext {
 
   constructor() {
     super();
     this.state = {
-      currentWorker: null,
+      currentWorker: null
     }
   }
 
+  componentWillMount() {
+    const { weekStore } = this.props;
+    weekStore.init().then(() => {
+      this.getWeekly();
+    });
+  }
+
+  // 获取周报
+  getWeekly = () => {
+    const { weekStore } = this.props;
+    let query = new window.AV.Query('weekly');
+    const newWeekly = {
+      0: {},
+      1: {},
+      2: {},
+      3: {},
+    };
+    query.equalTo('weekSign', this.weekSign);
+    query.find().then((res) => {
+      res.forEach((item) => {
+        const { weekSign, part, project, sort, text, status, date, worker } = item.attributes;
+        if (!newWeekly[part][project]) {
+          newWeekly[part][project] = [];
+        }
+        newWeekly[part][project].push(Object.assign({ id: item.id }, item.attributes));
+      });
+
+      weekStore.projectList && Object.values(weekStore.projectList).forEach((item) => {
+        if (newWeekly[0] && !newWeekly[0][item.value] && item.isCore) {
+          newWeekly[0][item.value] = [];
+        }
+        if (newWeekly[2] && !newWeekly[2][item.value]) {
+          newWeekly[2][item.value] = [];
+        }
+      });
+      // 初始化问题部分和下周计划部分
+      newWeekly[1][0] = !newWeekly[1][0] ? [] : newWeekly[1][0];
+      newWeekly[3][0] = !newWeekly[3][0] ? [] : newWeekly[3][0];
+      this.setState({
+        newTemplate: newWeekly
+      }, () => {
+      });
+    }, (error) => {
+    });
+  };
+
   // 渲染项目
-  getProject = ({ project, index, showWorker, isCore }) => {
-    if (!project.list || project.list.length === 0) {
+  getProject = ({ project, showWorker, isCore }) => {
+    const { weekStore } = this.props;
+    if (!project[1] || project[1].length === 0) {
       return null;
     }
     const { currentWorker } = this.state;
     return (
-      <div className="project" key={index}>
-        {!(currentWorker && isCore) && <div className="project-title paragraph">{project.label}：</div>}
+      <div className="project" key={project[0]}>
+        {!(currentWorker && isCore) && <div className="project-title paragraph">{weekStore.projectList[project[0]].label}：</div>}
         {
-          project.list && project.list.map((item, index) => {
+          project[1] && project[1].map((item, index) => {
             return this.getItem({ item, index, showWorker });
           })
         }
@@ -40,6 +85,8 @@ class Home extends React.Component {
 
   // 渲染每一个条目
   getItem = ({ item, index, showWorker }) => {
+    const { weekStore } = this.props;
+    const { statusList, workerList } = weekStore;
     const { currentWorker } = this.state;
     let show = showWorker && !currentWorker;
     return (
@@ -47,7 +94,7 @@ class Home extends React.Component {
         <span className="index">{index + 1}. </span>
         <span className="text">{item.text}</span>
         {
-          item.status && <span className="text">，{statusList[Number(item.status)].label}</span>
+          item.status && statusList[item.status] && <span className="text">，{statusList[item.status].label}</span>
         }
         {
           String(item.date).trim() && <span className="text">（{item.date}）</span>
@@ -57,6 +104,9 @@ class Home extends React.Component {
           <span className="worker">
           {
             item.worker.map((worker, i) => {
+              if (!workerList[worker]) {
+                return null;
+              }
               return (
                 <span className="worker" key={i}> @{workerList[worker].label}</span>
               );
@@ -77,7 +127,7 @@ class Home extends React.Component {
 
   // 过滤每个人的周报
   filterWeekly = () => {
-    const weekly = JSON.parse(localStorage.getItem('weekly'));
+    const weekly = this.state.newTemplate;
     if (!weekly) {
       return null;
     }
@@ -87,14 +137,13 @@ class Home extends React.Component {
     }
     return Object.values(weekly).map((part) => {
       // 遍历部分
-      return part.map((project) => {
-        const newProject = UTIL.deepCopy(project);
-        newProject.list = [];
+      return Object.entries(part).map((project) => {
+        const newProject = [];
         // 遍历项目
-        project.list.forEach((item) => {
+        project[1].forEach((item) => {
 
           if (item.worker.includes(currentWorker)) {
-            newProject.list.push(item);
+            newProject.push(item);
           }
         });
         return newProject;
@@ -103,10 +152,10 @@ class Home extends React.Component {
   };
 
   filterCore = (core) => {
-    const newCore = [{ list: [] }];
-    core.forEach((project) => {
-      project.list.forEach((item) => {
-        newCore[0].list.push(item);
+    const newCore = { 0: [] };
+    Object.entries(core).forEach((project) => {
+      project[1].forEach((item) => {
+        newCore[0].push(item);
       });
     });
     return newCore;
@@ -114,6 +163,7 @@ class Home extends React.Component {
 
   render() {
     const { currentWorker } = this.state;
+    const { workerList } = this.props.weekStore;
     const weekly = this.filterWeekly();
     if (!weekly) {
       return null;
@@ -124,6 +174,7 @@ class Home extends React.Component {
     const next = weekly[3];
     return (
       <div className="view-container">
+        <Link id="showKey" className="save-btn on" to="/edit">去编辑</Link>
         <div className="worker-box">
           {
             Object.values(workerList).map((item) => {
@@ -142,21 +193,22 @@ class Home extends React.Component {
         </div>
         <div className="core">
           <div className="title paragraph">核心工作要点:</div>
+
           {
-            core.map((project, index) => {
-              return this.getProject({ project, index, showWorker: false, isCore: true });
+            Object.entries(core).map((project, index) => {
+              return this.getProject({ project: project, showWorker: false, isCore: true });
             })
           }
         </div>
         <div className="problem">
           <div className="title paragraph">本周问题/故障：</div>
           {
-            problem[0].list.map((item, index) => {
+            problem[0] && problem[0].map((item, index) => {
               return this.getItem({ item, index });
             })
           }
           {
-            problem[0].list.length === 0 &&
+            problem[0] && problem[0].length === 0 &&
             <div className="item paragraph">1. 无；</div>
           }
           <div className="item paragraph"><br /></div>
@@ -165,7 +217,7 @@ class Home extends React.Component {
           <div className="title paragraph">详细进展：</div>
           <div>
             {
-              detail.map((project, index) => {
+              Object.entries(detail).map((project, index) => {
                 return this.getProject({ project, index, showWorker: true });
               })
             }
@@ -174,7 +226,7 @@ class Home extends React.Component {
         <div className="next">
           <div className="title paragraph">下周计划：</div>
           {
-            next[0].list.map((item, index) => {
+            next[0] && next[0].map((item, index) => {
               return this.getItem({ item, index, showWorker: true });
             })
           }
