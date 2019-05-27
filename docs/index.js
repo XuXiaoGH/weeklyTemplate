@@ -14540,6 +14540,57 @@ var Home = (_dec = (0, _mobxReact.inject)('weekStore'), _dec(_class = (0, _mobxR
       });
     };
 
+    _this.showRule = function () {
+      _Dialog.Dialog.show({
+        children: _this.getRule()
+      });
+    };
+
+    _this.getRule = function () {
+      return _react2.default.createElement(
+        'div',
+        { className: 'rule' },
+        _react2.default.createElement(
+          'div',
+          null,
+          '1.',
+          _react2.default.createElement(
+            'b',
+            null,
+            '\u5DF2\u4E0A\u7EBF\u72B6\u6001'
+          ),
+          '\u65F6\u95F4\u5FC5\u586B\u3001',
+          _react2.default.createElement(
+            'b',
+            null,
+            '\u5DF2\u4E0A\u9884\u53D1/\u5DF2\u63D0\u6D4B'
+          ),
+          '\u65F6\u95F4\u9009\u586B\u3001',
+          _react2.default.createElement(
+            'b',
+            null,
+            '\u5176\u4ED6\u72B6\u6001'
+          ),
+          '\u7981\u6B62\u9009\u62E9\u65F6\u95F4'
+        ),
+        _react2.default.createElement(
+          'div',
+          null,
+          '2.\u5982\'\u8FDB\u5EA6\uFF1A80%\'\u8FD9\u79CD\uFF0C\u81EA\u884C\u624B\u5199\uFF0C\u4E0D\u8981\u9009\u72B6\u6001\u4E5F\u4E0D\u8981\u9009\u65F6\u95F4'
+        ),
+        _react2.default.createElement(
+          'div',
+          null,
+          '3.\u6587\u672C\u6700\u540E\u4E0D\u9700\u8981\u624B\u5199\u5206\u53F7\uFF0C\u4F1A\u81EA\u52A8\u6DFB\u52A0'
+        ),
+        _react2.default.createElement(
+          'div',
+          null,
+          '3.\u5982\u679C\u662F\u51E0\u4E2A\u4EBA\u5171\u540C\u505A\u7684\u4E8B\u60C5\uFF0C\u8BB0\u5F97\u5728\u540E\u65B9@\u5176\u4ED6\u4EBA\uFF0C\u5E76\u901A\u77E5\u5176\u4ED6\u4EBA\u4F60\u5DF2\u7ECF\u6DFB\u52A0'
+        )
+      );
+    };
+
     _this.state = {
       newTemplate: null,
       currentWorker: '',
@@ -14611,9 +14662,18 @@ var Home = (_dec = (0, _mobxReact.inject)('weekStore'), _dec(_class = (0, _mobxR
           'div',
           null,
           _react2.default.createElement(
-            _reactRouterDom.Link,
-            { id: 'showKey', className: 'save-btn on', to: '/' },
-            '\u8FD4\u56DE\u67E5\u770B'
+            'span',
+            { className: 'save-btn on' },
+            _react2.default.createElement(
+              _reactRouterDom.Link,
+              { id: 'showKey', to: '/', className: 'link-btn' },
+              '\u8FD4\u56DE\u67E5\u770B'
+            ),
+            _react2.default.createElement(
+              'div',
+              { onClick: this.showRule, className: 'link-btn' },
+              '\u89C4\u5219\u8BF4\u660E'
+            )
           ),
           _react2.default.createElement(
             'div',

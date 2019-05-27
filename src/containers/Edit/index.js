@@ -251,6 +251,24 @@ class Home extends RootContext {
     });
   };
 
+  showRule = () => {
+    Dialog.show({
+      children: this.getRule()
+    });
+  };
+
+  getRule = () => {
+    return (
+      <div className="rule">
+
+        <div>1.<b>已上线状态</b>时间必填、<b>已上预发/已提测</b>时间选填、<b>其他状态</b>禁止选择时间</div>
+        <div>2.如'进度：80%'这种，自行手写，不要选状态也不要选时间</div>
+        <div>3.文本最后不需要手写分号，会自动添加</div>
+        <div>3.如果是几个人共同做的事情，记得在后方@其他人，并通知其他人你已经添加</div>
+      </div>
+    );
+  };
+
 
   render() {
     const { newTemplate } = this.state;
@@ -268,7 +286,10 @@ class Home extends RootContext {
         {
           this.state.currentWorker &&
           <div>
-            <Link id="showKey" className="save-btn on" to="/">返回查看</Link>
+            <span className="save-btn on">
+              <Link id="showKey" to="/" className="link-btn">返回查看</Link>
+              <div onClick={this.showRule} className="link-btn">规则说明</div>
+            </span>
             <div className="core">
               <div className="title paragraph">核心工作要点:</div>
               {

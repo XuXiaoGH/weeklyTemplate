@@ -201,9 +201,42 @@
     }
   }
 
-  .tips{
+  .tips {
     color: lightgrey;
     font-size: 14px;
     margin-top: 5px;
+  }
+  .save-btn {
+    width: 100px;
+    height: 100px;
+    line-height: 30px;
+    padding: 20px 0;
+    box-sizing: border-box;
+
+    &:hover {
+      box-shadow: 0 1px 15px 0 @switchOnColor;
+      color: @switchOnColor;
+    }
+
+    .link-btn {
+      text-decoration: none;
+      &:visited {
+        color: @switchOnColor;
+      }
+      &:hover {
+        color: @successIconColor;
+      }
+    }
+  }
+}
+
+.rule {
+  b {
+    color: #555;
+  }
+  div {
+    font-size: 16px;
+    line-height: 26px;
+    color: gray;
   }
 }
